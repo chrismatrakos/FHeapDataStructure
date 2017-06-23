@@ -9,9 +9,16 @@ import java.lang.StringBuilder;
  * described in the paper "Fibonacci Heaps Revisited" By Haim Kaplan, Robert E. 
  * Tarjan and Uri Zwick, 2014.
  *
+ *
+ * This Variation has the following heuristics applied (as proposed in the paper).
+ *
+ * 1. The Heap Order heuristic
+ * 2. The increasing rank heuristic
+ *
  */
 
-public class SimpleFibonacci {
+public class SFWithHeuristics {
+
 	// Map used for decrease specific Key and contains
 	private Node[] nodeMap;
 	// Root Node to access the heap
@@ -23,7 +30,7 @@ public class SimpleFibonacci {
 	// potential size of heap
 	private final int n;
 
-	public SimpleFibonacci(int n) {
+	public SFWithHeuristics(int n) {
 
 		this.n = n;
 		// Initializing map with ref's to where in the heap stuff is.
@@ -36,7 +43,9 @@ public class SimpleFibonacci {
 		// Initializing the main Heap
 		this.heap = new Heap();
 	}
-
+	public SFWithHeuristics NewHeap(int max){
+		return new SFWithHeuristics(max);
+	}
 	// Inserts a new Entry into the Heap
 	public void Insert(int id, double key) {
 
@@ -55,7 +64,7 @@ public class SimpleFibonacci {
 		return this.heap.Root().Key();
 	}
 
-	// Removes minimum Key, and returns it
+	// Removes minimum Key, and returns the reference to it
 	public int DeleteMin() {
 		// Getting back reference
 		int oldMin = this.heap.Root().Id();
@@ -66,7 +75,6 @@ public class SimpleFibonacci {
 		this.heap.Root(this.deleteMin(this.heap.Root()));
 
 		return oldMin;
-
 
 	}
 
@@ -106,9 +114,6 @@ public class SimpleFibonacci {
 		}
 	}
 
-	public SimpleFibonacci NewHeap(int max){
-		return new SimpleFibonacci(max);
-	}
 	//Internal Node class 
 	private class Node {
 
@@ -199,7 +204,7 @@ public class SimpleFibonacci {
 			return String.valueOf(this.Key());
 		}
 
-	}
+	}//end of private class Node
 
 	private Node makeItem(int id, double key) {
 		Node x = new Node();
@@ -228,6 +233,7 @@ public class SimpleFibonacci {
 	}
 
 	private Node link(Node x, Node y) {
+
 		if (x.Key() > y.Key()) {
 			addChild(x, y);
 			return y;
@@ -268,24 +274,41 @@ public class SimpleFibonacci {
 	}
 
 	private void decreaseRank(Node y) {
+		int k;
+
 		do {
 			y = y.Parent();
+			if(y == this.heap.Root()) {
+				break;
+			}
 			if (y.Rank() > 0) {
 				y.Rank(y.Rank() - 1);
 			}
 			y.State(!y.State());
-		} while (y.State() == false);
+			k = y.Rank();
+		} while (!(y.State() == true) || !(k >= y.Parent().Rank()));
 	}
 
 	private Node decreaseKey(Node x, double k, Node h) {
 		x.Key(k);
-		if (x.equals(h)) {
+
+		if (x == h) {
 			return h;
 		}
-		h.State(false);
-		decreaseRank(x);
-		Cut(x);
-		return link(x, h);
+
+		// Increasing Rank Heuristic
+		if(x.Rank() < x.Parent().Rank()) {
+			h.State(false);
+			decreaseRank(x);
+		}
+
+		// Heap order heuristic
+		if(k < x.Parent().Key()) {
+			Cut(x);
+			return link(x, h);
+		} else {
+			return h;
+		}
 	}
 
 	private Node deleteMin(Node h) {
@@ -328,7 +351,6 @@ public class SimpleFibonacci {
 	public String PrettyPrint(){
 		return this.traverseTree(this.heap.Root());
 	}
-
 	private String traverseTree(Node node) {
 		if(node == null) return "";
 		StringBuilder children = new StringBuilder();
