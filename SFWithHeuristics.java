@@ -2,13 +2,6 @@ import java.util.ArrayList;
 import java.lang.StringBuilder;
 
 /*
- * @author Chris Matrakou, Remy Themsen.
- * Both Students of ITU Copenhagen Spring 2016.
- * 
- * This is a priority queue implementation of the simple fibonacci heap as
- * described in the paper "Fibonacci Heaps Revisited" By Haim Kaplan, Robert E. 
- * Tarjan and Uri Zwick, 2014.
- *
  *
  * This Variation has the following heuristics applied (as proposed in the paper).
  *
